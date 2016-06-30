@@ -138,4 +138,32 @@ class FunSetSuite extends FunSuite {
     }
   }
 
+  test("forall is true if all the element of a set satisfy the given predicate") {
+    new TestSets {
+      val s = union(s1,s2)
+      val isTrue = forall(s, (n: Int) => n < 3)
+      assert(isTrue, "Forall 1")
+      val isFalse = forall(s, (n: Int) => n > 3)
+      assert(!isFalse, "Forall 2")
+    }
+  }
+
+  test("exists is true if at least one the element of a set satisfies the given predicate") {
+    new TestSets {
+      val s = union(s1,s2)
+      val isTrue = exists(s, (n: Int) => n < 2)
+      assert(isTrue, "Exists 1")
+      val isFalse = exists(s, (n: Int) => n > 3)
+      assert(!isFalse, "Exists 2")
+    }
+  }
+
+  test("map returns a set of tranformed element from s using f") {
+    new TestSets {
+      val s = union(s2, s3)
+      val doubled = map(s, (n: Int) => n * 2)
+      assert(contains(doubled, 4), "Map 1")
+    }
+  }
+
 }
