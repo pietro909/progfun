@@ -77,6 +77,7 @@ class FunSetSuite extends FunSuite {
     val s1 = singletonSet(1)
     val s2 = singletonSet(2)
     val s3 = singletonSet(3)
+    val s3b = singletonSet(3)
   }
 
   /**
@@ -110,5 +111,31 @@ class FunSetSuite extends FunSuite {
     }
   }
 
+  test("intersect contains only the elements which are in both set") {
+    new TestSets {
+      val u = union(s1, s2)
+      val s = intersect(u, s2)
+      assert(contains(s, 2), "Intersect 1")
+      assert(!contains(s, 1), "Intersect 2")
+    }
+  }
+
+  test("diff contains only the elements which are in the first set but not in the second") {
+    new TestSets {
+      val u = union(s1, s2)
+      val s = diff(u, s2)
+      assert(contains(s, 1), "Diff 1")
+      assert(!contains(s, 2), "Diff 2")
+    }
+  }
+
+  test("filter contains only the elements which are in the set and satisfy p") {
+    new TestSets {
+      val u = union(s1, s2)
+      val s = filter(u, (n: Int) => n == 1)
+      assert(contains(s, 1), "Filter 1")
+      assert(!contains(s, 2), "Filter 2")
+    }
+  }
 
 }
