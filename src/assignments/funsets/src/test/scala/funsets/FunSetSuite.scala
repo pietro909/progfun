@@ -162,6 +162,8 @@ class FunSetSuite extends FunSuite {
     new TestSets {
       val s = union(s2, s3)
       val doubled = map(s, (n: Int) => n * 2)
+      println(printSet(s))
+      println(printSet(doubled))
       assert(contains(doubled, 4), "Map 1")
     }
   }
