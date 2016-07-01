@@ -1,6 +1,7 @@
 *.swp
 *.swn
 *.swo
+*.class
 example/
 project/
 target/
