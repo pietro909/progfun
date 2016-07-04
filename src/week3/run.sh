@@ -1,2 +1,2 @@
 #!/bin/sh
-scalac binarytree.scala ; scala BinaryTree
+scalac $1.scala ; scala $1
