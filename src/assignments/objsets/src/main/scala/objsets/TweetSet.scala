@@ -41,7 +41,12 @@ abstract class TweetSet {
    * Question: Can we implment this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
-    def filter(p: Tweet => Boolean): TweetSet = filterAcc(p, new Empty)
+    def filter(p: Tweet => Boolean): TweetSet = {
+      val res = filterAcc(p, new Empty)
+      println(s"${p} gave ")
+      println(res)
+      res
+    }
   
   /**
    * This is a helper method for `filter` that propagetes the accumulated tweets.
@@ -104,10 +109,11 @@ abstract class TweetSet {
    * This method takes a function and applies it to every element in the set.
    */
   def foreach(f: Tweet => Unit): Unit
+
 }
 
 class Empty extends TweetSet {
-    def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = new Empty
+    def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = acc
 
     def union(that: TweetSet): TweetSet = that
 
@@ -122,15 +128,22 @@ class Empty extends TweetSet {
   def remove(tweet: Tweet): TweetSet = this
 
   def foreach(f: Tweet => Unit): Unit = ()
+  
+  override def toString = "."
 }
 
 class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
 
-    def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet =
-      if (p(elem))
-        left.filterAcc(p, new NonEmpty(elem, new Empty, new Empty)) union right.filterAcc(p, new Empty)
-      else
-        left.filterAcc(p, new Empty) union right.filterAcc(p, new Empty)
+    def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = {
+      println(s"filter ${elem}")
+      println(s"acc is ${acc}")
+      if (p(elem)) {
+        println(s" - ok")
+        val res = acc incl elem
+        left.filterAcc(p, res) union right.filterAcc(p, res)
+      } else
+        left.filterAcc(p, acc) union right.filterAcc(p, acc)
+    }
 
     def union(that: TweetSet): TweetSet =
       ((left union right) union that) incl elem
@@ -160,6 +173,8 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
     left.foreach(f)
     right.foreach(f)
   }
+
+  override def toString = s"{${left} ${elem} ${right}}"
 }
 
 trait TweetList {
