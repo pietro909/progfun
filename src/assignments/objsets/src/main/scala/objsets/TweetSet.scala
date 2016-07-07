@@ -1,6 +1,7 @@
 package objsets
 
 import TweetReader._
+import scala.annotation.tailrec
 
 /**
  * A class to represent tweets.
@@ -76,8 +77,18 @@ abstract class TweetSet {
    * Question: Should we implment this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
-    def descendingByRetweet: TweetList = ???
-  
+    def descendingByRetweet: TweetList = {
+      @tailrec def loop(set: TweetSet, list: TweetList): TweetList =
+        set match {
+          case set: NonEmpty =>
+            val mr = set.mostRetweeted
+            loop(set.remove(mr), new Cons(mr, list))
+          case _ =>
+            list
+        }
+      loop(this, Nil).reverse
+    }
+
   /**
    * The following methods are already implemented
    */
@@ -113,6 +124,7 @@ class Empty extends TweetSet {
     def union(that: TweetSet): TweetSet = that
 
     def mostRetweeted: Tweet = throw new NoSuchElementException("Empty set is not filterable")
+
   /**
    * The following methods are already implemented
    */
@@ -140,18 +152,23 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
     def union(that: TweetSet): TweetSet =
       ((left union right) union that) incl elem
 
+    def retweets = elem.retweets
 
-    def mostRetweeted: Tweet = {
-      var i = 0
-      var mr: Tweet = elem
-      foreach((t) =>
-        if (t.retweets > i) {
-          mr = t
-          i = t.retweets
-        }
-      )
-      mr
-    }
+    @tailrec final def mostRetweeted: Tweet =
+      (left, right) match {
+        case (l: NonEmpty, r: NonEmpty) =>
+          if (retweets > l.retweets && retweets > r.retweets) elem
+          else if (l.retweets > r.retweets) l.mostRetweeted
+          else r.mostRetweeted
+        case (l: NonEmpty, r: Empty) =>
+          if (retweets > l.retweets) elem
+          else l.mostRetweeted
+        case (l: Empty, r: NonEmpty) =>
+          if (retweets > r.retweets) elem
+          else r.mostRetweeted
+        case _ =>
+          elem
+      }
 
   /**
    * The following methods are already implemented
@@ -191,16 +208,27 @@ trait TweetList {
       f(head)
       tail.foreach(f)
     }
+  def reverse: TweetList
+
 }
 
 object Nil extends TweetList {
   def head = throw new java.util.NoSuchElementException("head of EmptyList")
   def tail = throw new java.util.NoSuchElementException("tail of EmptyList")
   def isEmpty = true
+  def reverse = Nil
 }
 
 class Cons(val head: Tweet, val tail: TweetList) extends TweetList {
   def isEmpty = false
+  def reverse: TweetList = {
+    @tailrec
+    def loop(origin: TweetList, result: TweetList): TweetList =
+      if (origin.isEmpty) result
+      else loop(origin.tail, new Cons(origin.head, result))
+
+      loop(this, Nil)
+  }
 }
 
 
