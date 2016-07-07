@@ -112,7 +112,7 @@ class Empty extends TweetSet {
 
     def union(that: TweetSet): TweetSet = that
 
-    def mostRetweeted: Tweet = new NoSuchElementException("Empty set is not filterable")
+    def mostRetweeted: Tweet = throw new NoSuchElementException("Empty set is not filterable")
   /**
    * The following methods are already implemented
    */
@@ -140,7 +140,18 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
     def union(that: TweetSet): TweetSet =
       ((left union right) union that) incl elem
 
+
     def mostRetweeted: Tweet = {
+      var i = 0
+      var mr: Tweet = elem
+      foreach((t) =>
+        if (t.retweets > i) {
+          mr = t
+          i = t.retweets
+        }
+      )
+      mr
+    }
 
   /**
    * The following methods are already implemented
