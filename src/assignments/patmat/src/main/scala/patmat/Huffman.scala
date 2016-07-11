@@ -21,11 +21,20 @@ object Huffman {
     abstract class CodeTree
   case class Fork(left: CodeTree, right: CodeTree, chars: List[Char], weight: Int) extends CodeTree
   case class Leaf(char: Char, weight: Int) extends CodeTree
-  
+
 
   // Part 1: Basics
-    def weight(tree: CodeTree): Int = ??? // tree match ...
-  
+  def weight(tree: CodeTree): Int = tree match {
+    case l: Leaf => l.weight
+    case f: Fork => 
+      if (f.weight > weight(f.left))
+        if (f.weight > weight(f.right)) f.weight
+        else weight(f.right)
+      else if (weight(f.right) > weight(f.left)) weight(f.right)
+      else weight(f.left)
+    case _ => throw new Error("can't calculate weight of unknown element")
+  }
+
     def chars(tree: CodeTree): List[Char] = ??? // tree match ...
   
   def makeCodeTree(left: CodeTree, right: CodeTree) =
