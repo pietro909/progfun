@@ -26,20 +26,21 @@ object Huffman {
   // Part 1: Basics
   def weight(tree: CodeTree): Int = tree match {
     case l: Leaf => l.weight
-    case f: Fork => 
+    case f: Fork =>
       if (f.weight > weight(f.left))
         if (f.weight > weight(f.right)) f.weight
         else weight(f.right)
       else if (weight(f.right) > weight(f.left)) weight(f.right)
       else weight(f.left)
-    case _ => throw new Error("can't calculate weight of unknown element")
   }
 
-    def chars(tree: CodeTree): List[Char] = ??? // tree match ...
-  
+  def chars(tree: CodeTree): List[Char] = tree match {
+    case l: Leaf => List(l.char)
+    case f: Fork => chars(f.left) ++ chars(f.right)
+  }
+
   def makeCodeTree(left: CodeTree, right: CodeTree) =
     Fork(left, right, chars(left) ::: chars(right), weight(left) + weight(right))
-
 
 
   // Part 2: Generating Huffman trees
@@ -78,8 +79,13 @@ object Huffman {
    *       println("integer is  : "+ theInt)
    *   }
    */
-    def times(chars: List[Char]): List[(Char, Int)] = ???
-  
+  def times(chars: List[Char]): List[(Char, Int)] = chars match {
+    case List() => List()
+    case c :: cs =>
+      val rest = cs.filter(_ == c)
+      (c, rest.length + 1) :: times(cs.filterNot(_ == c))
+  }
+
   /**
    * Returns a list of `Leaf` nodes for a given frequency table `freqs`.
    *
@@ -87,13 +93,13 @@ object Huffman {
    * head of the list should have the smallest weight), where the weight
    * of a leaf is the frequency of the character.
    */
-    def makeOrderedLeafList(freqs: List[(Char, Int)]): List[Leaf] = ???
-  
+  def makeOrderedLeafList(freqs: List[(Char, Int)]): List[Leaf] = freqs.sortWith((freq1: (Char, Int), freq2: (Char, Int)) => freq1._2 < freq2._2).map(f => Leaf(f._1, f._2))
+
   /**
    * Checks whether the list `trees` contains only one single code tree.
    */
-    def singleton(trees: List[CodeTree]): Boolean = ???
-  
+    def singleton(trees: List[CodeTree]): Boolean = chars(tree).distinct.size == tre.size
+
   /**
    * The parameter `trees` of this function is a list of code trees ordered
    * by ascending weights.
@@ -106,8 +112,10 @@ object Huffman {
    * If `trees` is a list of less than two elements, that list should be returned
    * unchanged.
    */
-    def combine(trees: List[CodeTree]): List[CodeTree] = ???
-  
+    def combine(trees: List[CodeTree]): List[CodeTree] = trees match {
+      case t1::t2::List() => trees
+      case t1::t2::ts => Fork(t1, t2, t1.char
+
   /**
    * This function will be called in the following way:
    *
