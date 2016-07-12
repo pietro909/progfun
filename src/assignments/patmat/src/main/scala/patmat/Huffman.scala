@@ -79,13 +79,14 @@ object Huffman {
    *       println("integer is  : "+ theInt)
    *   }
    */
-  def times(chars: List[Char]): List[(Char, Int)] = chars match {
-    case List() => List()
-    case c :: cs =>
-      val rest = cs.filter(_ == c)
-      (c, rest.length + 1) :: times(cs.filterNot(_ == c))
+  def times(chars: List[Char]): List[(Char, Int)] = {
+    def loop(c: Char, l: List[Char], i: Int): Int =
+      l match {
+        case List() => i
+        case h::t => if (h == c) loop(l.head, l.tail, i+1) else loop(l.head, l.tail, i)
+      }
+    chars.map(c => (c, loop(c, chars, 0)))
   }
-
   /**
    * Returns a list of `Leaf` nodes for a given frequency table `freqs`.
    *
@@ -98,7 +99,7 @@ object Huffman {
   /**
    * Checks whether the list `trees` contains only one single code tree.
    */
-    def singleton(trees: List[CodeTree]): Boolean = chars(tree).distinct.size == tre.size
+  def singleton(trees: List[CodeTree]): Boolean = trees.map(t => chars(t).distinct.size == trees.size).foldLeft(true)((x,y) => x&&y)
 
   /**
    * The parameter `trees` of this function is a list of code trees ordered
@@ -112,9 +113,9 @@ object Huffman {
    * If `trees` is a list of less than two elements, that list should be returned
    * unchanged.
    */
-    def combine(trees: List[CodeTree]): List[CodeTree] = trees match {
+    def combine(trees: List[CodeTree]): List[CodeTree] = ??? /*trees match {
       case t1::t2::List() => trees
-      case t1::t2::ts => Fork(t1, t2, t1.char
+      case t1::t2::ts => Fork(t1, t2, t1.char*/
 
   /**
    * This function will be called in the following way:
