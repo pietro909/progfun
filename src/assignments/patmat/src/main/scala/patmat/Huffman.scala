@@ -94,6 +94,19 @@ object Huffman {
         (h, res._1)::times(res._2)
     }
   }
+
+  def sortTransform[T](list: List[(Char, Int)], lowerThan: (T, T) => Boolean, transform: (Char, Int) => T): List[T] =
+    list match {
+      case List() => List()
+      case h::t => insert(transform(h._1, h._2), sortTransform[T](t, lowerThan, transform), lowerThan)
+    }
+
+  def insert[T](x: T, list: List[T], lowerThan: (T, T) => Boolean): List[T] =
+    list match {
+      case List() => List(x)
+      case h::t => if (lowerThan(x, h)) x::list else h::insert(x, t, lowerThan)
+    }
+
   /**
    * Returns a list of `Leaf` nodes for a given frequency table `freqs`.
    *
@@ -101,12 +114,16 @@ object Huffman {
    * head of the list should have the smallest weight), where the weight
    * of a leaf is the frequency of the character.
    */
-  def makeOrderedLeafList(freqs: List[(Char, Int)]): List[Leaf] = freqs.sortWith((freq1: (Char, Int), freq2: (Char, Int)) => freq1._2 < freq2._2).map(f => Leaf(f._1, f._2))
+  def makeOrderedLeafList(freqs: List[(Char, Int)]): List[Leaf] =
+    sortTransform[Leaf](freqs, (x: Leaf, y: Leaf) => x.weight <= y.weight, (c: Char, i: Int) => Leaf(c, i))
 
   /**
    * Checks whether the list `trees` contains only one single code tree.
    */
-  def singleton(trees: List[CodeTree]): Boolean = trees.map(t => chars(t).distinct.size == trees.size).foldLeft(true)((x,y) => x&&y)
+  def singleton(trees: List[CodeTree]): Boolean = trees match {
+    case List() => false
+    case _ => trees.map(t => chars(t).distinct.size == trees.size).foldLeft(true)((x,y) => x&&y)
+  }
 
   /**
    * The parameter `trees` of this function is a list of code trees ordered
