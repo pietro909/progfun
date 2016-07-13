@@ -80,12 +80,19 @@ object Huffman {
    *   }
    */
   def times(chars: List[Char]): List[(Char, Int)] = {
-    def loop(c: Char, l: List[Char], i: Int): Int =
+    def loop(c: Char, l: List[Char], i: Int, r: List[Char]): (Int, List[Char]) =
       l match {
-        case List() => i
-        case h::t => if (h == c) loop(l.head, l.tail, i+1) else loop(l.head, l.tail, i)
+        case List() => (i, r)
+        case h::t =>
+          if (h == c) loop(c, l.tail, i+1, r)
+          else loop(c, l.tail, i, l.head::r)
       }
-    chars.map(c => (c, loop(c, chars, 0)))
+    chars match {
+      case List() => List()
+      case h::t =>
+        val res = loop(h, t, 1, List())
+        (h, res._1)::times(res._2)
+    }
   }
   /**
    * Returns a list of `Leaf` nodes for a given frequency table `freqs`.
