@@ -120,10 +120,7 @@ object Huffman {
   /**
    * Checks whether the list `trees` contains only one single code tree.
    */
-  def singleton(trees: List[CodeTree]): Boolean = trees match {
-    case List() => false
-    case _ => trees.map(t => chars(t).distinct.size == trees.size).foldLeft(true)((x,y) => x&&y)
-  }
+  def singleton(trees: List[CodeTree]): Boolean = trees.size == 1
 
   /**
    * The parameter `trees` of this function is a list of code trees ordered
@@ -137,9 +134,10 @@ object Huffman {
    * If `trees` is a list of less than two elements, that list should be returned
    * unchanged.
    */
-    def combine(trees: List[CodeTree]): List[CodeTree] = ??? /*trees match {
-      case t1::t2::List() => trees
-      case t1::t2::ts => Fork(t1, t2, t1.char*/
+    def combine(trees: List[CodeTree]): List[CodeTree] = trees match {
+      case e::List() => trees
+      case e1::e2::tail => combine(insert[CodeTree](makeCodeTree(e1, e2), trees, (x: CodeTree, y: CodeTree) => weight(x) <= weight(y)))
+    }
 
   /**
    * This function will be called in the following way:
