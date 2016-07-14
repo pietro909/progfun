@@ -143,7 +143,7 @@ object Huffman {
           (x: CodeTree, y: CodeTree) => weight(x) <= weight(y)
         )
       )
-      case _ => throw new Error("invalid list")
+      case _ => trees
     }
 
   /**
