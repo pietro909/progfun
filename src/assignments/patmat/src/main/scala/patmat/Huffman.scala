@@ -228,8 +228,32 @@ object Huffman {
    * This function encodes `text` using the code tree `tree`
    * into a sequence of bits.
    */
-    def encode(tree: CodeTree)(text: List[Char]): List[Bit] = ???
-  
+    def encode(tree: CodeTree)(text: List[Char]): List[Bit] =
+      text match {
+        case List() => List()
+        case h::t => encodeCharacter(h, tree, List())++encode(tree)(t)
+      }
+
+    def leafOrFork[T](tree: CodeTree)(onLeaf: Leaf => T, onFork: Fork => T): T =
+      tree match {
+          case l: Leaf => onLeaf(l)
+          case f: Fork => onFork(f)
+      }
+
+    type Result = List[Bit]
+
+    def encodeCharacter(c: Char, tree: CodeTree, encoded: List[Bit]): List[Bit] =
+      leafOrFork[Result](tree)(
+        (leaf: Leaf) => encoded,
+        (fork: Fork) => {
+          val isLeft = leafOrFork[Boolean](fork.left)(l => l.char == c, f => f.chars.contains(c))
+          val isRight = leafOrFork[Boolean](fork.right)(l => l.char == c, f => f.chars.contains(c))
+          if (isLeft) encodeCharacter(c, fork.left, 0::encoded)
+          else encodeCharacter(c, fork.right, 1::encoded)
+        }
+      )
+
+
   // Part 4b: Encoding using code table
 
   type CodeTable = List[(Char, List[Bit])]
