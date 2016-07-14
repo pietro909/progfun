@@ -135,8 +135,15 @@ object Huffman {
    * unchanged.
    */
     def combine(trees: List[CodeTree]): List[CodeTree] = trees match {
-      case e::List() => trees
-      case e1::e2::tail => combine(insert[CodeTree](makeCodeTree(e1, e2), trees, (x: CodeTree, y: CodeTree) => weight(x) <= weight(y)))
+      case e1::e2::List() => trees
+      case e1::e2::tail => combine(
+        insert[CodeTree](
+          makeCodeTree(e1, e2),
+          tail,
+          (x: CodeTree, y: CodeTree) => weight(x) <= weight(y)
+        )
+      )
+      case _ => throw new Error("invalid list")
     }
 
   /**
