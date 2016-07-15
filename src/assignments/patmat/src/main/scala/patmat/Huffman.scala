@@ -231,7 +231,12 @@ object Huffman {
     def encode(tree: CodeTree)(text: List[Char]): List[Bit] =
       text match {
         case List() => List()
-        case h::t => encodeCharacter(h, tree, List())++encode(tree)(t)
+        case h::t => {
+          val ec = encodeCharacter(h, tree, List())
+          println(s"${h} -> ${ec}")
+          // encodeCharacter(h, tree, List())++encode(tree)(t)
+          ec++encode(tree)(t)
+        }
       }
 
     def leafOrFork[T](tree: CodeTree)(onLeaf: Leaf => T, onFork: Fork => T): T =
@@ -244,12 +249,20 @@ object Huffman {
 
     def encodeCharacter(c: Char, tree: CodeTree, encoded: List[Bit]): List[Bit] =
       leafOrFork[Result](tree)(
-        (leaf: Leaf) => encoded,
+        (leaf: Leaf) => {
+          println(s"found leaf - $c == ${leaf.char}")
+          encoded
+        },
         (fork: Fork) => {
           val isLeft = leafOrFork[Boolean](fork.left)(l => l.char == c, f => f.chars.contains(c))
-          val isRight = leafOrFork[Boolean](fork.right)(l => l.char == c, f => f.chars.contains(c))
-          if (isLeft) encodeCharacter(c, fork.left, 0::encoded)
-          else encodeCharacter(c, fork.right, 1::encoded)
+          val isRight = leafOrFork[Boolean](fork.right)(r => r.char == c, f => f.chars.contains(c))
+          if (isLeft) {
+            println(s" L - ${fork.left}")
+            encodeCharacter(c, fork.left, 0::encoded)
+          } else {
+            println(s" R - ${fork.right}")
+            encodeCharacter(c, fork.right, 1::encoded)
+          }
         }
       )
 
@@ -262,8 +275,13 @@ object Huffman {
    * This function returns the bit sequence that represents the character `char` in
    * the code table `table`.
    */
-    def codeBits(table: CodeTable)(char: Char): List[Bit] = ???
-  
+    def codeBits(table: CodeTable)(char: Char): List[Bit] = table match {
+      case List() => List()
+      case h::t =>
+        if (h._1 == c) h._2
+        else codeBits(t)(char)
+    }
+
   /**
    * Given a code tree, create a code table which contains, for every character in the
    * code tree, the sequence of bits representing that character.
@@ -272,8 +290,9 @@ object Huffman {
    * a valid code tree that can be represented as a code table. Using the code tables of the
    * sub-trees, think of how to build the code table for the entire tree.
    */
-    def convert(tree: CodeTree): CodeTable = ???
-  
+    def convert(tree: CodeTree): CodeTable = leafOrFork[CodeTable](tree)(
+      leaf => List((leaf.char,
+
   /**
    * This function takes two code tables and merges them into one. Depending on how you
    * use it in the `convert` method above, this merge method might also do some transformations
