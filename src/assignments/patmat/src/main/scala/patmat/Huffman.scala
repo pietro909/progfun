@@ -293,20 +293,46 @@ object Huffman {
    * a valid code tree that can be represented as a code table. Using the code tables of the
    * sub-trees, think of how to build the code table for the entire tree.
    */
-    def convert(tree: CodeTree): CodeTable = ???
-  
+    def convert(tree: CodeTree): CodeTable = {
+      def loop(node: CodeTree, bits: List[Bit], result: CodeTable): CodeTable =
+        leafOrFork(node)(
+          leaf => result :+ (leaf.char, bits),
+          fork => result ::: loop(fork.left, bits:+0, result) ::: loop(fork.right, bits:+1, result)
+        )
+
+      loop(tree, List(), List())
+    }
+
   /**
    * This function takes two code tables and merges them into one. Depending on how you
    * use it in the `convert` method above, this merge method might also do some transformations
    * on the two parameter code tables.
    */
     def mergeCodeTables(a: CodeTable, b: CodeTable): CodeTable = ???
-  
+
   /**
    * This function encodes `text` according to the code tree `tree`.
    *
    * To speed up the encoding process, it first converts the code tree to a code table
    * and then uses it to perform the actual encoding.
    */
-    def quickEncode(tree: CodeTree)(text: List[Char]): List[Bit] = ???
+    def quickEncode(tree: CodeTree)(text: List[Char]): List[Bit] = {
+      val codeTable = convert(tree)
+      def loop(string: List[Char], acc: List[Bit]): List[Bit] =
+        string match {
+          case h::t => loop(t, acc ::: findBitsByChar(h, codeTable))
+          case _ => acc
+        }
+
+      loop(text, List())
+    }
+
+    def findBitsByChar(char: Char, codeTable: CodeTable): List[Bit] =
+      codeTable match {
+        case h::t =>
+          if (h._1 == char) h._2
+          else findBitsByChar(char, t)
+        case _ =>
+          throw new NoSuchElementException(s"can't find ${char} in table ${codeTable}")
+      }
   }
