@@ -135,7 +135,6 @@ object Huffman {
    * unchanged.
    */
     def combine(trees: List[CodeTree]): List[CodeTree] = trees match {
-      // case e1::e2::List() => trees
       case e1::e2::tail =>
         insert[CodeTree](
           makeCodeTree(e1, e2),
@@ -191,7 +190,7 @@ object Huffman {
       def loop(node: CodeTree, list: List[Bit], acc: List[Char]): List[Char] =
         (node, list) match {
           case (Leaf(char: Char, weight: Int), _) =>
-            loop(tree, list, acc:+char)
+            loop(tree, list, acc :+ char)
           case (Fork(left: CodeTree, right: CodeTree, chars: List[Char], weight: Int), h::t) => {
             val nextNode = if (h == 0) left else right
             loop(nextNode, t, acc)
@@ -231,12 +230,8 @@ object Huffman {
     def encode(tree: CodeTree)(text: List[Char]): List[Bit] =
       text match {
         case List() => List()
-        case h::t => {
-          val ec = encodeCharacter(h, tree, List())
-          println(s"${h} -> ${ec}")
-          // encodeCharacter(h, tree, List())++encode(tree)(t)
-          ec++encode(tree)(t)
-        }
+        case h::t =>
+          encodeCharacter(h, tree, List()) ::: encode(tree)(t)
       }
 
     def leafOrFork[T](tree: CodeTree)(onLeaf: Leaf => T, onFork: Fork => T): T =
@@ -250,21 +245,29 @@ object Huffman {
     def encodeCharacter(c: Char, tree: CodeTree, encoded: List[Bit]): List[Bit] =
       leafOrFork[Result](tree)(
         (leaf: Leaf) => {
-          println(s"found leaf - $c == ${leaf.char}")
+          //println(s"found leaf - $c == ${leaf.char}")
           encoded
         },
         (fork: Fork) => {
           val isLeft = leafOrFork[Boolean](fork.left)(l => l.char == c, f => f.chars.contains(c))
           val isRight = leafOrFork[Boolean](fork.right)(r => r.char == c, f => f.chars.contains(c))
-          if (isLeft) {
-            println(s" L - ${fork.left}")
-            encodeCharacter(c, fork.left, 0::encoded)
-          } else {
-            println(s" R - ${fork.right}")
-            encodeCharacter(c, fork.right, 1::encoded)
-          }
+          if (isLeft)
+            encodeCharacter(c, fork.left, encoded :+ 0)
+          else
+            encodeCharacter(c, fork.right, encoded :+ 1)
         }
       )
+
+    def doText(text: String): List[Bit] = {
+      val t = text.toList
+      val c = createCodeTree(t)
+      println(s"codetree --> ${c}")
+      val e = encode(c)(t)
+      val r = decode(c, e)
+      println(r.mkString)
+      println(text)
+      e
+    }
 
 
   // Part 4b: Encoding using code table
@@ -278,7 +281,7 @@ object Huffman {
     def codeBits(table: CodeTable)(char: Char): List[Bit] = table match {
       case List() => List()
       case h::t =>
-        if (h._1 == c) h._2
+        if (h._1 == char) h._2
         else codeBits(t)(char)
     }
 
@@ -290,9 +293,8 @@ object Huffman {
    * a valid code tree that can be represented as a code table. Using the code tables of the
    * sub-trees, think of how to build the code table for the entire tree.
    */
-    def convert(tree: CodeTree): CodeTable = leafOrFork[CodeTable](tree)(
-      leaf => List((leaf.char,
-
+    def convert(tree: CodeTree): CodeTable = ???
+  
   /**
    * This function takes two code tables and merges them into one. Depending on how you
    * use it in the `convert` method above, this merge method might also do some transformations
