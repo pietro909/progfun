@@ -1,4 +1,4 @@
-package week5
+package week6
 
 object Queens {
 
