@@ -1,8 +1,17 @@
-package week6
+// package week7
 
 import scala.io.Source
 
 object phoneNumbers {
+
+  def main(args: Array[String]): Unit = {
+    val number = if (args.size > 0) args(0) else ""
+    val results = encode(number)
+    println(s"number $number can be encoded as")
+    results map println
+    // println( wordsForNum )
+  }
+
 
   val in = Source.fromURL("http://lamp.epfl.ch/files/content/sites/lamp/files/teaching/progfun/linuxwords.txt")
 
@@ -22,15 +31,23 @@ object phoneNumbers {
       word.toUpperCase map charCode
 
     def wordsForNum: Map[String, Seq[String]] =
-        words groupBy wordCode
+       words groupBy wordCode withDefaultValue(Seq())
 
-    def encode(number: String): Set[Seq[String]] =
-        if (number.isEmpty) Set(Seq())
+    /**
+     * given "123"
+     *  calculate 1 23 12 3
+     *  return a set with all the result in one seq
+     **/
+    def encode(number: String): Set[List[String]] =
+        if (number.isEmpty) Set(List())
         else
-            for {
-                i <- 1 to numer.length
-                word <- number take i
+            (for {
+                i <- 1 to number.length
+                word <- wordsForNum(number take i)
                 rest <- encode(number drop i)
-            } yield word::rest
+            } yield {
+              println(word)
+              word :: rest
+            }).toSet
 
 }
