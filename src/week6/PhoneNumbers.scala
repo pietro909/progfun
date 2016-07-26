@@ -6,7 +6,7 @@ object phoneNumbers {
 
   def main(args: Array[String]): Unit = {
     val number = if (args.size > 0) args(0) else ""
-    val results = encode(number)
+    val results = translate(number)
     println(s"number $number can be encoded as")
     results map println
     // println( wordsForNum )
@@ -45,9 +45,9 @@ object phoneNumbers {
                 i <- 1 to number.length
                 word <- wordsForNum(number take i)
                 rest <- encode(number drop i)
-            } yield {
-              println(word)
-              word :: rest
-            }).toSet
+            } yield word :: rest).toSet
+
+    def translate(number: String): Set[String] =
+      encode(number) map { _ mkString " " }
 
 }
