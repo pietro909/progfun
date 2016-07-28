@@ -37,14 +37,6 @@ object Anagrams {
   def wordOccurrences(w: Word): Occurrences =
     ((w toLowerCase) groupBy (c => c) map { case(l, o) => (l, o.length) }).toList.sorted
 
-    /*w.toLowerCase match {
-    case "" => List()
-    case word =>  {
-      val grouped = word groupBy(_ == word.head) withDefaultValue("")
-      ((word.head, grouped(true).length) :: wordOccurrences(grouped(false))).sorted
-    }
-  }*/
-
   /** Converts a sentence into its character occurrencence list. */
   def sentenceOccurrences(s: Sentence): Occurrences = wordOccurrences(s mkString)
 
@@ -97,16 +89,28 @@ object Anagrams {
    *  Note that the order of the occurrence list subsets does not matter -- the subsets
    *  in the example above could have been displayed in some other order.
    */
-  def combinations(occurrences: Occurrences): List[Occurrences] = occurences match {
-    case List() => List()
-    case h::t =>
-      val (letter, times) = h
-      (for {
-        i <- 1 to times
-        rest <- combinations(t)
-      } yield (List(letter, i) ++ rest)).toList
+  def combinations(occurrences: Occurrences, count: Int = 0): List[Occurrences] ={
+      println(s"$count -> $occurrences")
+      occurrences match {
+          case List() =>
+              // println(s"$count: empty")
+              List()
+          case head::tail =>
+              println(s"$head :: $tail")
+              val (letter, times): (Char, Int) = head
+              // println(s"for 1 to $times")
+              val result = (for {
+                  i <- 1 to times
+                  rest <- List(combinations(tail, count + 1))
+              } yield {
+                  val r: List[Occurrences] = (combinations(tail) map (c => (letter, i) :: c)) ++ List(List((letter, i))) ++ combinations(tail)
+                  println(s"    $r")
+                  r
+              }).toList.flatten
+              println(s"$count: result -> $result")
+              result
+      }
   }
-
   /** Subtracts occurrence list `y` from occurrence list `x`.
    *
    *  The precondition is that the occurrence list `y` is a subset of
