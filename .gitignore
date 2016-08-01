@@ -2,5 +2,4 @@
 *.swn
 *.swo
 *.class
-example/
 target/
