@@ -14,6 +14,10 @@ trait Generator[+T] {
 
 }
 
+trait Tree
+case class Inner(left: Tree, right: Tree) extends Tree
+case class Leaf(value: Int) extends Tree
+
 object Generators {
 
   val integers = new Generator[Int] {
@@ -49,5 +53,18 @@ object Generators {
     isEmpty <- booleans
     list <- if (isEmpty) emptyList else nonEmptyLists
   } yield list
+
+  private def leaf =
+    for (i <- integers) yield Leaf(i)
+
+  private def branch = for {
+    left <- trees
+    right <- trees
+  } yield Inner(left, right)
+
+  def trees: Generator[Tree] = for {
+    isEmpty <- booleans
+    tree <- if (isEmpty) leaf else branch
+  } yield tree
 
 }
