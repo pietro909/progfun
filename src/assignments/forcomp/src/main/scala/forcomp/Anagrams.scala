@@ -89,28 +89,38 @@ object Anagrams {
    *  Note that the order of the occurrence list subsets does not matter -- the subsets
    *  in the example above could have been displayed in some other order.
    */
-  def combinations(occurrences: Occurrences, count: Int = 0): List[Occurrences] ={
-      println(s"$count -> $occurrences")
-      occurrences match {
-          case List() =>
-              // println(s"$count: empty")
-              List()
-          case head::tail =>
-              println(s"$head :: $tail")
-              val (letter, times): (Char, Int) = head
-              // println(s"for 1 to $times")
-              val result = (for {
-                  i <- 1 to times
-                  rest <- List(combinations(tail, count + 1))
-              } yield {
-                  val r: List[Occurrences] = (combinations(tail) map (c => (letter, i) :: c)) ++ List(List((letter, i))) ++ combinations(tail)
-                  println(s"    $r")
-                  r
-              }).toList.flatten
-              println(s"$count: result -> $result")
-              result
-      }
+  def combinations(occurrences: Occurrences): List[Occurrences] = occurrences match {
+    case List() =>
+        // println(s"EMPTY")
+        List(List())
+    case head::tail =>
+        val (char, n) = head
+        val column = for (i <- 1 to n) yield (char, i)
+        // println(s"$char 1 to $n")
+        // println(column)
+        val empty = comboCol(column.toList, List(List()))
+        val combo = combinations(tail)
+        // println(s" c: $combo")
+        val result = 
+            comboCol(column.toList, List(tail)) ++
+            comboCol(column.toList, combinations(tail)) ++
+            combo ++
+            empty
+        // println(result)
+        result distinct
   }
+
+  def comboCol(column: Occurrences, combinations: List[Occurrences]): List[Occurrences] =
+      (for {
+          elem <- column
+          tail <- combinations
+      } yield {
+          // println(s"    -> $elem :: $tail")
+          (elem :: tail)
+      }).toList
+
+
+
   /** Subtracts occurrence list `y` from occurrence list `x`.
    *
    *  The precondition is that the occurrence list `y` is a subset of
@@ -121,7 +131,11 @@ object Anagrams {
    *  Note: the resulting value is an occurrence - meaning it is sorted
    *  and has no zero-entries.
    */
-  def subtract(x: Occurrences, y: Occurrences): Occurrences = ???
+  def subtract(x: Occurrences, y: Occurrences): Occurrences =
+      y.foldLeft[Occurrences](x)((b: Occurrences, a: (Char, Int)) => {
+          val i = b indexOf a
+          (b take i) ++ (b drop i+1)
+      })
 
   /** Returns a list of all anagram sentences of the given sentence.
    *
@@ -163,5 +177,17 @@ object Anagrams {
    *
    *  Note: There is only one anagram of an empty sentence.
    */
-  def sentenceAnagrams(sentence: Sentence): List[Sentence] = ???
+  def sentenceAnagrams(sentence: Sentence): List[Sentence] = {
+    // convert all sentence to occurrences
+    // combine each occurrence with the rest of occurrences
+    //    for each combination find all the words from the dictionary
+    val length = sentence.mkString.length
+    val occurrences = sentenceOccurrences(sentence)
+    val combs = combinations(occurrences)
+    println(combs)
+    val words = (combs map { comb => dictionaryByOccurrences filter { case(o, words) => o == comb } } map (_.map(_._2)) flatten) filterNot (_.isEmpty)
+    // println(words)
+    words  // filter (_.length == sentenceAsString.length)
+  }
+
 }
