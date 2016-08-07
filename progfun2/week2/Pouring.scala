@@ -30,7 +30,7 @@ class Pouring(capacity: Vector[Int]) {
 
   // Paths
   class Path(history: List[Move]) {
-    def endState: State = (history foldRight initialState) (_ change _)
+    lazy val endState: State = (history foldRight initialState) (_ change _)
     def extend(move: Move) = new Path(move :: history)
     override def toString = (history.reverse mkString " ") + " --> " + endState
   }
