@@ -29,11 +29,10 @@ trait Solver extends GameDef {
    * It should only return valid neighbors, i.e. block positions
    * that are inside the terrain.
    */
-  def neighborsWithHistory(b: Block, history: List[Move]): Stream[(Block, List[Move])] = (
-    for {
+  def neighborsWithHistory(b: Block, history: List[Move]): Stream[(Block, List[Move])] = (for {
       (block, move) <- b.legalNeighbors
-    } yield (block, move :: history) #:: neighborsWithHistory(block, move :: history)
-  ).flatten.toStream
+    } yield (block, move :: history)
+  ).toStream
 
   /**
    * This function returns the list of neighbors without the block
