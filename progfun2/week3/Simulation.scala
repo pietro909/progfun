@@ -41,5 +41,11 @@ trait Simulation {
     loop()
   }
 
+  def probe(name: String, wire: Wire): Unit = {
+    def probeAction(): Unit = {
+      println(s"$name $currentTime value = ${wire.getSignal}")
+    }
+    wire addAction probeAction
+  }
 
 }
