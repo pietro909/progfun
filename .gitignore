@@ -3,3 +3,4 @@
 *.swo
 *.class
 target/
+.idea/
