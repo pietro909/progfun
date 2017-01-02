@@ -44,35 +44,35 @@ package object scalashop {
 
   /** Computes the blurred RGBA value of a single pixel of the input image. */
   def boxBlurKernel(src: Img, x: Int, y: Int, radius: Int): RGBA = {
-    // TODO implement using while loops
-    val minX = clamp(x - radius, 0, src.width)
-    var minY = clamp(y - radius, 0, src.height)
-    val maxX = clamp(x + radius, 0, src.width)
-    val maxY = clamp(y + radius, 0, src.height)
-    var average: Option[RGBA] = None
-    println(s"*** $x, $y with $radius")
-    println(src)
+    val minX = clamp(x - radius, 0, src.width - 1)
+    var minY = clamp(y - radius, 0, src.height - 1)
+    val maxX = clamp(x + radius, 0, src.width - 1)
+    val maxY = clamp(y + radius, 0, src.height - 1)
+    var totalPixels = 0
+    var sums: (Int, Int, Int, Int) = (0, 0, 0, 0)
+
     while (minY <= maxY) {
       var currentX = minX
       while (currentX <= maxX) {
         val pixel = src(currentX, minY)
-        println(s" at($currentX, $minY) is $pixel")
-        average = average match {
-          case Some(number) =>
-            val r = (red(pixel) + red(number)) / 2
-            val g = (green(pixel) + green(number)) / 2
-            val b = (blue(pixel) + blue(number)) / 2
-            val a = (alpha(pixel) + alpha(number)) / 2
-            Some(rgba(r, g, b, a))
-          case None =>
-            Some(pixel)
-          }
+        totalPixels += 1
+        sums = (
+          sums._1 + red(pixel),
+          sums._2 + green(pixel),
+          sums._3 + blue(pixel),
+          sums._4 + alpha(pixel)
+        )
         currentX += 1
       }
       minY += 1
     }
-    println(s"average = $average")
-    average.get
+
+    rgba(
+      sums._1 / totalPixels,
+      sums._2 / totalPixels,
+      sums._3 / totalPixels,
+      sums._4 / totalPixels
+    )
   }
 
 }

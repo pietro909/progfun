@@ -33,6 +33,28 @@ class BlurSuite extends FunSuite {
         s"but it's ${boxBlurKernel(src, 1, 2, 1)})")
   }
 
+  test("boxblurkernel 4x3 radius 2 " +
+    "4x3 image") {
+    val w = 4
+    val h = 3
+    val src = new Img(w, h)
+    src(0, 0) = 0; src(1, 0) = 1; src(2, 0) = 2; src(3, 0) = 9
+    src(0, 1) = 3; src(1, 1) = 4; src(2, 1) = 5; src(3, 1) = 10
+    src(0, 2) = 6; src(1, 2) = 7; src(2, 2) = 8; src(3, 2) = 11
+
+    assert(boxBlurKernel(src, 0, 0, 2) === 4,
+      s"(boxBlurKernel(0, 0, 2) should be 4, " +
+        s"but it's ${boxBlurKernel(src, 0, 0, 2)})")
+
+    assert(boxBlurKernel(src, 3, 1, 2) === 6,
+      s"(boxBlurKernel(2, 1, 2) should be 6, " +
+        s"but it's ${boxBlurKernel(src, 3, 1, 2)})")
+
+    assert(boxBlurKernel(src, 3, 2, 2) === 6,
+      s"(boxBlurKernel(3, 2, 2) should be 6, " +
+        s"but it's ${boxBlurKernel(src, 3, 2, 2)})")
+  }
+
   test("HorizontalBoxBlur.blur with radius 1 should correctly blur the entire 3x3 image") {
     val w = 3
     val h = 3
