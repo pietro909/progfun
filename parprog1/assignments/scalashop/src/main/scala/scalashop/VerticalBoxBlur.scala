@@ -43,12 +43,15 @@ object VerticalBoxBlur {
    *  bottom.
    */
   def blur(src: Img, dst: Img, from: Int, end: Int, radius: Int): Unit = {
+    println(s"start blur radius $radius")
+    println(src)
     var column = from
     while (column < end) {
       var row = 0
       while (row < src.height) {
         val blurred = boxBlurKernel(src, column, row, radius)
         dst.update(column, row, blurred)
+        println(s"$column, $row = $blurred")
         row += 1
       }
       column += 1
@@ -62,11 +65,18 @@ object VerticalBoxBlur {
    *  columns.
    */
   def parBlur(src: Img, dst: Img, numTasks: Int, radius: Int): Unit = {
-    val range = 0 until src.width by numTasks
-    range.zip(range.tail).map({
-      case (from, end) =>
-        task { blur(src, dst, from, end - 1, radius) }
-    }).map(task => task.join())
+    if (src.width >= numTasks) {
+      val range = 0 to src.width by numTasks
+      println(s"who called me $range")
+      range.zip(range.tail).map({
+        case (from, end) =>
+          println(s"task $from, $end")
+          task { blur(src, dst, from, end - 1, radius) }
+      }).map(task => task.join())
+    } else {
+      println(s"blur from 0 to ${src.width}")
+      blur(src, dst, 0, src.width, radius)
+    }
   }
 
 }
